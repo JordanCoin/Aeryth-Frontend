@@ -1,28 +1,15 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { Provider } from 'react-redux';
-import { store } from './store';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
-import { logger } from './utils/logger';
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js').then(
-      registration => {
-        logger.info('ServiceWorker registration successful', registration);
-      },
-      err => {
-        logger.error('ServiceWorker registration failed:', err);
-      }
-    );
-  });
-}
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error('Root element not found');
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const root = createRoot(rootElement);
+
+root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
+    <App />
   </React.StrictMode>
 );

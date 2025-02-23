@@ -35,14 +35,14 @@ describe('TextInput', () => {
   });
 
   it('shows validation error for short text', async () => {
-    const { rerender } = render(<TextInput {...defaultProps} value="short" />);
+    render(<TextInput {...defaultProps} value="short" />);
 
     // Trigger validation by changing the value
     const textarea = screen.getByPlaceholderText('Describe your tasks here...');
     await act(async () => {
-      await userEvent.type(textarea, ' '); // Trigger onChange
-      await userEvent.clear(textarea); // Clear back
-      await userEvent.type(textarea, 'short'); // Type short text
+      await userEvent.type(textarea, ' ');
+      await userEvent.clear(textarea);
+      await userEvent.type(textarea, 'short');
     });
 
     // Now check for error message

@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
-import { Task, TaskStatus, Priority } from '../../types/task.types';
-import { useWebSocketUpdates } from '../../hooks/useWebSocketUpdates';
-import { logger } from '../../utils/logger';
+import React, { useMemo, useEffect } from 'react';
+import { Task, TaskStatus, Priority } from '@/types/task.types';
+import { useWebSocketUpdates } from '@/hooks/useWebSocketUpdates';
+import { logger } from '@/utils/logger';
 
 interface TaskListProps {
   tasks: Task[];
@@ -25,20 +25,29 @@ export const TaskList: React.FC<TaskListProps> = ({
   const taskIds = tasks.map(task => task.id);
   const { updates, status: wsStatus } = useWebSocketUpdates(taskIds);
 
-  const sortTasks = (tasksToSort: Task[]) => {
-    return [...tasksToSort].sort((a, b) => {
-      switch (sortBy) {
-        case 'dueDate':
-          return (a.dueDate || '').localeCompare(b.dueDate || '');
-        case 'priority':
-          return b.priority.localeCompare(a.priority);
-        case 'created':
-          return b.createdAt.localeCompare(a.createdAt);
-        default:
-          return 0;
-      }
-    });
-  };
+  useEffect(() => {
+    if (updates.length > 0) {
+      logger.info('Processing task updates', { count: updates.length });
+      // Handle updates here
+    }
+  }, [updates]);
+
+  const sortTasks = useMemo(() => {
+    return (tasksToSort: Task[]) => {
+      return [...tasksToSort].sort((a, b) => {
+        switch (sortBy) {
+          case 'dueDate':
+            return (a.dueDate || '').localeCompare(b.dueDate || '');
+          case 'priority':
+            return b.priority.localeCompare(a.priority);
+          case 'created':
+            return b.createdAt.localeCompare(a.createdAt);
+          default:
+            return 0;
+        }
+      });
+    };
+  }, [sortBy]);
 
   const groupedTasks = useMemo(() => {
     const grouped: GroupedTasks = {};
@@ -51,7 +60,6 @@ export const TaskList: React.FC<TaskListProps> = ({
       grouped[key].push(task);
     });
 
-    // Sort tasks within each group
     Object.keys(grouped).forEach(key => {
       grouped[key] = sortTasks(grouped[key]);
     });
@@ -63,7 +71,7 @@ export const TaskList: React.FC<TaskListProps> = ({
     });
 
     return grouped;
-  }, [tasks, groupBy, sortBy]);
+  }, [tasks, groupBy, sortBy, sortTasks]);
 
   const renderTask = (task: Task) => (
     <div key={task.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-2">

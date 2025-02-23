@@ -1,23 +1,22 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { store } from './store';
 import { Toaster } from 'react-hot-toast';
-import TaskExtractor from './features/task-extractor/TaskExtractor';
-import Layout from './components/Layout';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import NetworkStatus from './components/NetworkStatus';
+import AppRoutes from './routes';
+import { TaskExtractor } from './features/task-extractor/components/TaskExtractor';
 
 function App() {
   return (
-    <Router>
-      <Toaster position="top-right" />
-      <ErrorBoundary>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<TaskExtractor />} />
-          </Routes>
-        </Layout>
-      </ErrorBoundary>
-      <NetworkStatus />
-    </Router>
+    <Provider store={store}>
+      <Router>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <TaskExtractor />
+          <AppRoutes />
+          <Toaster position="top-right" />
+        </div>
+      </Router>
+    </Provider>
   );
 }
 

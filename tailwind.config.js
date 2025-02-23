@@ -1,16 +1,13 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{js,jsx,ts,tsx}",
   ],
-  darkMode: 'media',
   theme: {
-    extend: {
-      animation: {
-        'spin-slow': 'spin 3s linear infinite',
-      }
-    },
+    extend: {},
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
+  darkMode: 'class',
 } 

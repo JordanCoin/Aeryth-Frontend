@@ -16,13 +16,6 @@ vi.mock('react-hot-toast', () => ({
   },
 }));
 
-interface MockAxiosConfig {
-  headers: Record<string, string>;
-  data?: unknown;
-  method?: string;
-  url?: string;
-}
-
 // Helper to create mock Axios errors
 const createMockAxiosError = (status?: number, message = 'Error') => {
   const error = new Error(message) as AxiosError;
