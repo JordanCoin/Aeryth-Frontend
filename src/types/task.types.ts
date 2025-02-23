@@ -29,4 +29,42 @@ export interface Task {
   createdAt: string;
   dueDate?: string;
   project?: string;
+  text: string;
+  verified: boolean | null;
+  scheduled: boolean;
+  completed: boolean;
+  integrations?: {
+    zoom?: ZoomMeeting;
+    slack?: SlackIntegration;
+  };
+}
+
+export interface ZoomMeeting {
+  meetingId: string;
+  scheduledTime: string;
+  notes?: {
+    summary: string;
+    actionItems: string[];
+    timestamp: string;
+  };
+}
+
+export interface SlackIntegration {
+  channel: string;
+  notified: boolean;
+}
+
+export interface Story {
+  id: number;
+  timestamp: string;
+  title: string;
+  narrative: string;
+  tasks: Task[];
+  tags: string[];
+}
+
+export interface Analysis {
+  summary: string;
+  breakdown: string[];
+  categories: Record<string, number>;
 }

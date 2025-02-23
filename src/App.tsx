@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 import { Toaster } from 'react-hot-toast';
 import AppRoutes from './routes';
-import { TaskExtractor } from './features/task-extractor/components/TaskExtractor';
+import { TaskExtractor } from '//.././/components/TaskExtractor';
 
 function App() {
   return (
