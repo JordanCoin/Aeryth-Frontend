@@ -4,14 +4,13 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 import { Toaster } from 'react-hot-toast';
 import AppRoutes from './routes';
-import { TaskExtractor } from '//.././/components/TaskExtractor';
+import TaskExtractor from './features/task-extractor/index';
 
 function App() {
   return (
     <Provider store={store}>
       <Router>
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <TaskExtractor />
           <AppRoutes />
           <Toaster position="top-right" />
         </div>

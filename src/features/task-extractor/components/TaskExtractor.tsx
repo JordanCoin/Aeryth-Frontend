@@ -259,10 +259,9 @@ export const TaskExtractor: React.FC<TaskExtractorProps> = ({ onChange, onSubmit
                   onClick={onSubmit}
                   disabled={!inputText || isProcessing}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center space-x-2 w-full justify-center"
-                  isLoading={isProcessing}
                 >
                   <Sparkles className="w-5 h-5" />
-                  <span>Extract Tasks</span>
+                  <span>{isProcessing ? 'Extracting...' : 'Extract Tasks'}</span>
                 </Button>
               </div>
             </Card>
@@ -277,48 +276,80 @@ export const TaskExtractor: React.FC<TaskExtractorProps> = ({ onChange, onSubmit
                   <h2 className="text-lg font-medium text-gray-900">Analysis & Tasks</h2>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <h3 className="font-medium text-blue-900 mb-2">Content Analysis</h3>
-                    <p className="text-blue-800 text-sm mb-3">{mockAnalysis.summary}</p>
-                    <div className="space-y-2">
-                      {mockAnalysis.breakdown.map((point, index) => (
-                        <div key={index} className="flex items-center text-sm text-blue-700">
-                          <span className="mr-2">•</span>
-                          {point}
+                {!mockAnalysis && (
+                  <div className="text-center text-gray-500 py-8">
+                    Extract tasks to see the analysis here
+                  </div>
+                )}
+
+                {mockAnalysis && (
+                  <div className="space-y-4">
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <h3 className="font-medium text-blue-900 mb-2">Content Analysis</h3>
+                      <p className="text-blue-800 text-sm mb-3">{mockAnalysis.summary}</p>
+                      <div className="space-y-2">
+                        {mockAnalysis.breakdown.map((point, index) => (
+                          <div key={index} className="flex items-center text-sm text-blue-700">
+                            <span className="mr-2">•</span>
+                            {point}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Alert className="bg-green-50 border-green-200">
+                      <AlertTitle className="text-green-800">
+                        {stories[0]?.tasks.length || 0} Tasks Extracted
+                      </AlertTitle>
+                    </Alert>
+
+                    <div className="space-y-3">
+                      {stories[0]?.tasks.map(task => (
+                        <div
+                          key={task.id}
+                          className={`flex items-center justify-between p-3 bg-gray-50 rounded-md ${
+                            task.completed ? 'bg-gray-100' : ''
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3 flex-grow">
+                            <button
+                              onClick={() => handleTaskVerification(stories[0].id, task.id, true)}
+                              className={`w-6 h-6 rounded-full flex items-center justify-center border ${
+                                task.verified ? 'bg-green-500 border-green-500' : 'border-gray-300'
+                              }`}
+                            >
+                              {task.verified && <Check className="w-4 h-4 text-white" />}
+                            </button>
+                            <span className="text-gray-800">{task.text}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            {task.verified && (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    setSelectedTask(task);
+                                    setShowCalendarModal(true);
+                                  }}
+                                  className="p-1 text-gray-400 hover:text-blue-500"
+                                >
+                                  <Calendar className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    await handleSlackNotify(task, 'team-tasks');
+                                  }}
+                                  className="p-1 text-gray-400 hover:text-purple-500"
+                                >
+                                  <MessageSquare className="w-4 h-4" />
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
-
-                  <Alert className="bg-green-50 border-green-200">
-                    <AlertTitle className="text-green-800">
-                      {stories.reduce((total, story) => total + story.tasks.length, 0)} Tasks
-                      Extracted
-                    </AlertTitle>
-                  </Alert>
-
-                  <div className="space-y-3">
-                    {stories.map(story => (
-                      <div
-                        key={story.id}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <button className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center">
-                            {story.tasks.every(task => task.completed) && (
-                              <Check className="w-4 h-4 text-green-500" />
-                            )}
-                          </button>
-                          <span className="text-gray-800">{story.title}</span>
-                        </div>
-                        <button className="text-gray-400 hover:text-gray-600">
-                          <X className="w-5 h-5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                )}
               </div>
             </Card>
           </div>
@@ -327,13 +358,14 @@ export const TaskExtractor: React.FC<TaskExtractorProps> = ({ onChange, onSubmit
           <div className="lg:col-span-4">
             <Card className="p-6 bg-white shadow-lg">
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <BookOpen className="w-5 h-5 text-gray-600" />
-                    <h2 className="text-lg font-medium text-gray-900">Task Stories</h2>
-                  </div>
-                  <span className="text-sm text-gray-500">Developer Verification Required</span>
+                <div className="flex items-center space-x-2">
+                  <BookOpen className="w-5 h-5 text-gray-600" />
+                  <h2 className="text-lg font-medium text-gray-900">Task Stories</h2>
                 </div>
+
+                {stories.length === 0 && (
+                  <div className="text-center text-gray-500 py-8">No stories yet</div>
+                )}
 
                 <div className="space-y-6">
                   {stories.map(story => (
@@ -360,87 +392,12 @@ export const TaskExtractor: React.FC<TaskExtractorProps> = ({ onChange, onSubmit
                       </div>
 
                       <div className="mt-3 pt-3 border-t border-gray-200">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Final Tasks:</h4>
-                        <ul className="space-y-3">
-                          {story.tasks.map(task => (
-                            <li key={task.id} className="flex items-center justify-between group">
-                              <div className="flex items-center space-x-2 flex-grow">
-                                {editingTaskId === task.id ? (
-                                  <input
-                                    type="text"
-                                    value={task.text}
-                                    className="flex-grow px-2 py-1 text-sm border rounded"
-                                    onBlur={() => setEditingTaskId(null)}
-                                    onKeyDown={e => e.key === 'Enter' && setEditingTaskId(null)}
-                                  />
-                                ) : (
-                                  <span className="text-sm text-gray-600">{task.text}</span>
-                                )}
-                              </div>
-
-                              <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
-                                  onClick={() => setEditingTaskId(task.id)}
-                                  className="p-1 text-gray-400 hover:text-blue-500"
-                                >
-                                  <Edit2 className="w-4 h-4" />
-                                </button>
-
-                                <div className="flex items-center space-x-1">
-                                  <button
-                                    onClick={() => handleTaskVerification(story.id, task.id, true)}
-                                    className={`p-1 rounded-full ${
-                                      task.verified === true
-                                        ? 'text-green-500 bg-green-50'
-                                        : 'text-gray-400 hover:text-green-500'
-                                    }`}
-                                  >
-                                    <ThumbsUp className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleTaskVerification(story.id, task.id, false)}
-                                    className={`p-1 rounded-full ${
-                                      task.verified === false
-                                        ? 'text-red-500 bg-red-50'
-                                        : 'text-gray-400 hover:text-red-500'
-                                    }`}
-                                  >
-                                    <ThumbsDown className="w-4 h-4" />
-                                  </button>
-                                </div>
-
-                                {task.verified === true && !task.scheduled && (
-                                  <div className="flex items-center space-x-1">
-                                    <button
-                                      onClick={() => {
-                                        setSelectedTask(task);
-                                        setShowCalendarModal(true);
-                                      }}
-                                      className="p-1 text-gray-400 hover:text-blue-500"
-                                      title="Schedule Task"
-                                    >
-                                      <Calendar className="w-4 h-4" />
-                                    </button>
-
-                                    <button
-                                      onClick={async () => {
-                                        const slackDetails = await handleSlackNotify(
-                                          task,
-                                          'team-tasks'
-                                        );
-                                        // Update task with Slack details
-                                      }}
-                                      className="p-1 text-gray-400 hover:text-purple-500 group relative"
-                                      title="Send to Slack"
-                                    >
-                                      <MessageSquare className="w-4 h-4" />
-                                      {task.integrations?.slack?.notified && (
-                                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full" />
-                                      )}
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">Related Tasks:</h4>
+                        <ul className="space-y-1">
+                          {story.tasks.map((task, index) => (
+                            <li key={index} className="text-sm text-gray-600 flex items-start">
+                              <span className="mr-2">•</span>
+                              <span>{task.text}</span>
                             </li>
                           ))}
                         </ul>
@@ -455,67 +412,22 @@ export const TaskExtractor: React.FC<TaskExtractorProps> = ({ onChange, onSubmit
       </div>
 
       {/* Error Alert */}
-      {error && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3"
-        >
-          <AlertCircle className="w-5 h-5 text-red-500 mt-0.5" />
-          <div>
-            <h3 className="text-red-800 font-medium">Error</h3>
-            <p className="text-red-600">{error}</p>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Task States */}
-      <div className="space-y-4">
-        {stories.map(story => (
-          <div
-            key={story.id}
-            className={`p-4 rounded-lg border ${
-              story.tasks.every(task => task.completed)
-                ? 'bg-green-50 border-green-200'
-                : story.tasks.every(task => task.verified)
-                  ? 'bg-blue-50 border-blue-200'
-                  : 'bg-gray-50 border-gray-200'
-            }`}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-4 right-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    story.tasks.every(task => task.completed)
-                      ? 'bg-green-500'
-                      : story.tasks.every(task => task.verified)
-                        ? 'bg-blue-500'
-                        : 'bg-gray-400'
-                  }`}
-                />
-                <span className="font-medium">{story.title}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                {story.tasks.every(task => task.completed) ? (
-                  <span className="text-sm text-green-600">Completed</span>
-                ) : story.tasks.every(task => task.verified) ? (
-                  <button
-                    onClick={() => {
-                      setSelectedTask(story.tasks.find(task => !task.completed) || null);
-                      setShowCalendarModal(true);
-                    }}
-                    className="text-sm text-blue-600 hover:text-blue-700"
-                  >
-                    Schedule Now
-                  </button>
-                ) : (
-                  <span className="text-sm text-gray-500">Needs Verification</span>
-                )}
-              </div>
+            <AlertCircle className="w-5 h-5 text-red-500 mt-0.5" />
+            <div>
+              <h3 className="text-red-800 font-medium">Error</h3>
+              <p className="text-red-600">{error}</p>
             </div>
-          </div>
-        ))}
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Calendar Modal */}
       {selectedTask && (

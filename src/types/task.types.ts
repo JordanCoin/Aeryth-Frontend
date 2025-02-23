@@ -23,13 +23,11 @@ export type Priority = 'low' | 'medium' | 'high';
 export interface Task {
   id: string;
   title: string;
+  text: string;
   description: string;
   status: TaskStatus;
   priority: Priority;
   createdAt: string;
-  dueDate?: string;
-  project?: string;
-  text: string;
   verified: boolean | null;
   scheduled: boolean;
   completed: boolean;
@@ -68,3 +66,5 @@ export interface Analysis {
   breakdown: string[];
   categories: Record<string, number>;
 }
+
+export type AnalyticsEvent = 'TASK_EXTRACTION' | 'TASK_SCHEDULED' | 'CACHE_HIT' | 'ERROR';

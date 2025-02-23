@@ -2,7 +2,8 @@ import React from 'react';
 import { TaskExtractor } from './components/TaskExtractor';
 import { logger } from '@/utils/logger';
 
-const TaskExtractorFeature: React.FC = () => {
+// Wrap TaskExtractor with feature-level logic
+const TaskExtractorWrapper: React.FC = () => {
   const handleChange = (value: string) => {
     logger.info('Text changed', { length: value.length });
   };
@@ -14,4 +15,5 @@ const TaskExtractorFeature: React.FC = () => {
   return <TaskExtractor onChange={handleChange} onSubmit={handleSubmit} />;
 };
 
-export default TaskExtractorFeature;
+// Export the wrapped component as default
+export default TaskExtractorWrapper;
