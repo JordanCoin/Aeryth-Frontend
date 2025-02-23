@@ -1,0 +1,6 @@
+# ... other entries
+
+# Don't ignore Husky files
+!.husky
+!.husky/* 
+node_modules
