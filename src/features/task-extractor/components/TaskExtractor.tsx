@@ -1,5 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Sparkles, ClipboardList, X, Check, BookOpen } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
@@ -10,67 +12,58 @@ interface TaskExtractorProps {
 
 export const TaskExtractor: React.FC<TaskExtractorProps> = ({ onChange, onSubmit }) => {
   const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleExtract = useCallback(() => {
-    setIsProcessing(true);
-    onSubmit();
-    setTimeout(() => setIsProcessing(false), 2000);
-  }, [onSubmit]);
+  const [tasks, setTasks] = useState([]);
+  const [analysis, setAnalysis] = useState(null);
+  const [stories, setStories] = useState([]);
 
   const editor = useEditor({
     extensions: [StarterKit],
     editorProps: {
       attributes: {
-        class: 'prose dark:prose-invert max-w-none min-h-[200px] focus:outline-none',
+        class: 'min-h-[200px] w-full focus:outline-none prose-lg prose-slate dark:prose-invert',
       },
     },
     onUpdate: ({ editor }) => {
       onChange(editor.getText());
-      if (editor.isEmpty) setIsProcessing(false);
     },
   });
 
+  const handleExtract = useCallback(() => {
+    setIsProcessing(true);
+    onSubmit();
+    // Simulate API call - replace with real backend call
+    setTimeout(() => {
+      // Add mock data handling here
+      setIsProcessing(false);
+    }, 2000);
+  }, [onSubmit]);
+
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8 text-center"
-      >
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
-          Extract Tasks Intelligently
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300 mt-2">
-          Paste your notes, emails, or documents. We will identify your tasks.
-        </p>
-      </motion.div>
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-bold text-gray-900">AI-Powered Task Extraction</h1>
+          <p className="text-lg text-gray-600">Transform your text into actionable tasks</p>
+        </div>
 
-      {/* Main Editor */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 relative">
-        <EditorContent editor={editor} />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Input Card */}
+          <div className="lg:col-span-4">
+            <Card className="p-6 bg-white shadow-lg">{/* Card content */}</Card>
+          </div>
 
-        {/* Floating Action Button */}
-        <motion.button
-          onClick={handleExtract}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="absolute bottom-6 right-6 bg-blue-600 text-white px-6 py-3 rounded-full
-                     shadow-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
-        >
-          <span>Extract Tasks</span>
-          {isProcessing && (
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-              className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-            />
-          )}
-        </motion.button>
+          {/* Analysis Card */}
+          <div className="lg:col-span-4">
+            <Card className="p-6 bg-white shadow-lg">{/* Analysis content */}</Card>
+          </div>
+
+          {/* Stories Card */}
+          <div className="lg:col-span-4">
+            <Card className="p-6 bg-white shadow-lg">{/* Stories content */}</Card>
+          </div>
+        </div>
       </div>
-
-      {/* Results Section */}
-      <AnimatePresence>{/* Task results would render here */}</AnimatePresence>
     </div>
   );
 };
