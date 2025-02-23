@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import TaskExtractor from './features/task-extractor/TaskExtractor';
 import Layout from './components/Layout';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import NetworkStatus from './components/NetworkStatus';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           </Routes>
         </Layout>
       </ErrorBoundary>
+      <NetworkStatus />
     </Router>
   );
 }

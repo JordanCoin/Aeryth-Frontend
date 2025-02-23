@@ -4,3 +4,7 @@
 !.husky
 !.husky/* 
 node_modules
+
+# Testing
+coverage
+.nyc_output

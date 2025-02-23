@@ -9,14 +9,16 @@ interface Props {
 interface State {
   hasError: boolean;
   error?: Error;
+  key: number;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
+    key: 0,
   };
 
-  public static getDerivedStateFromError(error: Error): State {
+  public static getDerivedStateFromError(error: Error): Partial<State> {
     return { hasError: true, error };
   }
 
@@ -29,7 +31,11 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleReset = () => {
-    this.setState({ hasError: false, error: undefined });
+    this.setState(state => ({
+      hasError: false,
+      error: undefined,
+      key: state.key + 1,
+    }));
   };
 
   public render() {
@@ -55,6 +61,6 @@ export class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    return this.props.children;
+    return <div key={this.state.key}>{this.props.children}</div>;
   }
 }
