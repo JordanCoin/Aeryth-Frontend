@@ -7,7 +7,7 @@ interface TaskListProps {
   tasks: Task[];
   onStatusChange?: (taskId: string, status: TaskStatus) => void;
   onPriorityChange?: (taskId: string, priority: Priority) => void;
-  groupBy?: 'status' | 'priority' | 'project';
+  groupBy?: 'status' | 'priority' | 'assignee' | 'type';
   sortBy?: 'dueDate' | 'priority' | 'created';
 }
 
@@ -53,13 +53,29 @@ export const TaskList: React.FC<TaskListProps> = ({
     const grouped: GroupedTasks = {};
 
     tasks.forEach(task => {
-      const key = task[groupBy] || 'undefined';
+      let key = 'undefined';
+      switch (groupBy) {
+        case 'status':
+          key = task.status || 'undefined';
+          break;
+        case 'priority':
+          key = task.priority || 'undefined';
+          break;
+        case 'assignee':
+          key = task.assignee || 'unassigned';
+          break;
+        case 'type':
+          key = task.type || 'other';
+          break;
+      }
+      
       if (!grouped[key]) {
         grouped[key] = [];
       }
       grouped[key].push(task);
     });
 
+    // Sort each group
     Object.keys(grouped).forEach(key => {
       grouped[key] = sortTasks(grouped[key]);
     });

@@ -1,10 +1,14 @@
 type LogLevel = 'info' | 'warn' | 'error' | 'debug';
+type LogData = Record<string, unknown>;
 
 class Logger {
   private static instance: Logger;
   private isDevelopment = import.meta.env.DEV;
 
-  private constructor() {}
+  private constructor() {
+    // Private constructor for singleton pattern
+    console.info('Logger instance created');
+  }
 
   static getInstance(): Logger {
     if (!Logger.instance) {
@@ -13,27 +17,28 @@ class Logger {
     return Logger.instance;
   }
 
-  private log(level: LogLevel, message: string, ...args: any[]) {
+  private log(level: LogLevel, message: string, data?: LogData): void {
+    const timestamp = new Date().toISOString();
     if (this.isDevelopment) {
-      console[level](`[${level.toUpperCase()}] ${message}`, ...args);
+      console[level](`[${timestamp}] [${level.toUpperCase()}] ${message}`, data || '');
     }
     // Here we could add remote logging service integration
   }
 
-  info(message: string, ...args: any[]) {
-    this.log('info', message, ...args);
+  info(message: string, data?: LogData): void {
+    this.log('info', message, data);
   }
 
-  warn(message: string, ...args: any[]) {
-    this.log('warn', message, ...args);
+  warn(message: string, data?: LogData): void {
+    this.log('warn', message, data);
   }
 
-  error(message: string, ...args: any[]) {
-    this.log('error', message, ...args);
+  error(message: string, data?: LogData): void {
+    this.log('error', message, data);
   }
 
-  debug(message: string, ...args: any[]) {
-    this.log('debug', message, ...args);
+  debug(message: string, data?: LogData): void {
+    this.log('debug', message, data);
   }
 }
 

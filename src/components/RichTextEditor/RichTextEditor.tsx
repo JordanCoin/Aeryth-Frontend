@@ -1,19 +1,15 @@
 import React, { useCallback, useMemo } from 'react';
 import { createEditor, Descendant, Editor } from 'slate';
-import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
+import { Slate, Editable, withReact } from 'slate-react';
 import { withHistory } from 'slate-history';
 import { logger } from '../../utils/logger';
 
 interface RichTextEditorProps {
-  value: string;
-  onChange: (value: string) => void;
+  initialValue?: string;
+  onChange?: (value: string) => void;
   onMention?: (mention: string) => void;
   onTag?: (tag: string) => void;
   placeholder?: string;
-  suggestions?: {
-    mentions: string[];
-    tags: string[];
-  };
 }
 
 const initialValue: Descendant[] = [
@@ -24,12 +20,11 @@ const initialValue: Descendant[] = [
 ];
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
-  value,
+  initialValue,
   onChange,
   onMention,
   onTag,
   placeholder = 'Start typing...',
-  suggestions,
 }) => {
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
@@ -39,7 +34,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         .map(n => Editor.string(editor, [editor.children.indexOf(n)]))
         .join('\n');
 
-      onChange(content);
+      onChange?.(content);
 
       // Handle mentions and tags
       const text = content.toLowerCase();

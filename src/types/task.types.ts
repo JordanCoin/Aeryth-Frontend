@@ -20,6 +20,8 @@ export interface TaskUpdate {
 export type TaskStatus = 'todo' | 'in_progress' | 'done';
 export type Priority = 'low' | 'medium' | 'high';
 
+export type TaskSource = 'manual' | 'git' | 'code' | 'radar' | 'pipeline' | 'integration';
+
 export interface Task {
   id: string;
   title: string;
@@ -27,10 +29,33 @@ export interface Task {
   description: string;
   status: TaskStatus;
   priority: Priority;
+  source: TaskSource;
   createdAt: string;
   verified: boolean | null;
   scheduled: boolean;
   completed: boolean;
+  type?: 'terminal' | 'git' | 'general' | 'file' | 'ci' | 'gitlab' | 'ios';
+  assignee?: string;
+  dueDate?: string;
+  estimate?: string;
+  tags?: string[];
+  dependencies?: string[];
+  metadata?: {
+    confidence?: number;
+    source?: string;
+    radarScore?: number;
+    requires?: string[];
+    pipeline?: {
+      type: 'ios' | 'android' | 'web';
+      steps: string[];
+      config: Record<string, unknown>;
+    };
+  };
+  progress?: {
+    type: 'time' | 'percentage' | 'steps';
+    current?: number;
+    steps?: Array<{ name: string; completed: boolean }>;
+  };
   integrations?: {
     zoom?: ZoomMeeting;
     slack?: SlackIntegration;

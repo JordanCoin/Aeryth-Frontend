@@ -1,10 +1,13 @@
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import TaskManagement from '@/features/task-management';
+import { TaskRadar } from '@/features/task-radar';
+import { TaskCLI } from '@/features/task-cli/components/TaskCLI';
 
 // Lazy load components for better performance
-const TaskExtractor = React.lazy(() => import('../features/task-extractor'));
-const TaskManagement = React.lazy(() => import('../features/task-management'));
+const TaskExtractorComponent = React.lazy(() => import('../features/task-extractor'));
+const TaskManagementComponent = React.lazy(() => import('../features/task-management'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -18,11 +21,12 @@ const AppRoutes = () => {
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
         {/* Home route */}
-        <Route path="/" element={<Navigate to="/extract" replace />} />
+        <Route path="/" element={<Navigate to="/tasks" replace />} />
 
         {/* Main routes */}
-        <Route path="/extract" element={<TaskExtractor />} />
+        <Route path="/extract" element={<TaskRadar />} />
         <Route path="/tasks" element={<TaskManagement />} />
+        <Route path="/cli" element={<TaskCLI />} />
 
         {/* Catch all route - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
