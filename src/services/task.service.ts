@@ -2,7 +2,21 @@ import { ExtractedTask } from '../types/task.types';
 import { api } from './api';
 import { offlineService } from './offline.service';
 import { logger } from '../utils/logger';
-import { analytics } from './analytics.service';
+import { analytics, AnalyticsEvent } from './analytics.service';
+import { errorService } from './error.service';
+import axios from 'axios';
+
+// Add at the top of the file
+interface TaskData {
+  content: string;
+  status: 'pending' | 'completed';
+}
+
+const ANALYTICS_EVENTS = {
+  TASK_SYNC: 'TASK_SYNC',
+  TASK_QUEUED: 'TASK_QUEUED',
+  SYNC_FAILED: 'SYNC_FAILED',
+} as const;
 
 // Sync configuration
 const SYNC_CONFIG = {
@@ -62,12 +76,13 @@ export class TaskSyncService {
   };
 
   public async queueTasks(tasks: ExtractedTask[]) {
-    // Split into smaller batches if needed
     const batches = this.splitIntoBatches(tasks);
     this.syncQueue.push(...batches);
 
     offlineService.saveTasksToCache(tasks);
-    analytics.trackEvent('TASK_QUEUED', { taskCount: tasks.length });
+    analytics.trackEvent(ANALYTICS_EVENTS.TASK_QUEUED as AnalyticsEvent, {
+      taskCount: tasks.length,
+    });
 
     if (navigator.onLine && !this.isSyncing) {
       await this.syncTasks();
@@ -124,9 +139,8 @@ export class TaskSyncService {
 
   private handleSyncError(error: unknown) {
     logger.error('Task sync failed:', error);
-    analytics.trackEvent('ERROR', {
+    analytics.trackEvent(ANALYTICS_EVENTS.SYNC_FAILED as AnalyticsEvent, {
       errorType: 'SYNC_FAILED',
-      retryCount: this.retryCount,
     });
   }
 
@@ -141,10 +155,10 @@ export const { useSaveTasksMutation, useGetTasksQuery } = taskApi;
 
 export const processTask = async (taskData: TaskData) => {
   try {
-    // Implementation without dispatch
-    return await api.post('/tasks', taskData);
+    const response = await axios.post('/tasks', taskData);
+    return response.data;
   } catch (error) {
-    handleError(error);
+    errorService.handleError(error);
     throw error;
   }
 };

@@ -8,3 +8,14 @@ export interface ExtractedTask {
   dependencies: string[];
   estimatedTime?: string;
 }
+
+export interface TaskUpdate {
+  taskId: string;
+  type: 'status' | 'priority' | 'content';
+  value: string;
+  timestamp: number;
+  userId: string;
+}
+
+export type TaskStatus = 'todo' | 'in_progress' | 'done';
+export type Priority = 'low' | 'medium' | 'high';

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { errorService } from './error.service';
 import { logger } from '../utils/logger';
 import toast from 'react-hot-toast';
-import { AxiosError } from 'axios';
+import { AxiosError, AxiosHeaders, AxiosResponse } from 'axios';
 
 vi.mock('../utils/logger', () => ({
   logger: {
@@ -27,14 +27,16 @@ interface MockAxiosConfig {
 const createMockAxiosError = (status?: number, message = 'Error') => {
   const error = new Error(message) as AxiosError;
   error.isAxiosError = true;
+  const headers = new AxiosHeaders();
+
   error.response = status
-    ? {
+    ? ({
         status,
         statusText: message,
         data: {},
-        headers: {},
-        config: {} as MockAxiosConfig,
-      }
+        headers,
+        config: { headers },
+      } as AxiosResponse)
     : undefined;
   return error;
 };

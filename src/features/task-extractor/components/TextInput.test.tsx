@@ -1,8 +1,8 @@
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import TextInput from './TextInput';
+import { TextInput } from './TextInput';
 
 describe('TextInput', () => {
   const defaultProps = {
@@ -12,10 +12,15 @@ describe('TextInput', () => {
     isLoading: false,
   };
 
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
   it('renders correctly', () => {
     render(<TextInput {...defaultProps} />);
     expect(screen.getByPlaceholderText('Describe your tasks here...')).toBeInTheDocument();
-    expect(screen.getByRole('button')).toHaveTextContent('Extract Tasks');
+    expect(screen.getByRole('button', { name: 'Extract Tasks' })).toBeInTheDocument();
   });
 
   it('calls onChange when typing', async () => {
@@ -23,26 +28,39 @@ describe('TextInput', () => {
     render(<TextInput {...defaultProps} onChange={onChange} />);
 
     const input = screen.getByPlaceholderText('Describe your tasks here...');
-    await userEvent.type(input, 't');
+    await act(async () => {
+      await userEvent.type(input, 't');
+    });
     expect(onChange).toHaveBeenCalledWith('t');
   });
 
   it('shows validation error for short text', async () => {
     const { rerender } = render(<TextInput {...defaultProps} value="short" />);
-    rerender(<TextInput {...defaultProps} value="short" />);
 
-    const errorMessage = await screen.findByText('Text is too short (minimum 10 characters)');
+    // Trigger validation by changing the value
+    const textarea = screen.getByPlaceholderText('Describe your tasks here...');
+    await act(async () => {
+      await userEvent.type(textarea, ' '); // Trigger onChange
+      await userEvent.clear(textarea); // Clear back
+      await userEvent.type(textarea, 'short'); // Type short text
+    });
+
+    // Now check for error message
+    const errorMessage = screen.getByText('Text is too short (minimum 10 characters)');
     expect(errorMessage).toBeInTheDocument();
+    expect(errorMessage).toHaveClass('text-red-500');
   });
 
   it('shows loading state', () => {
     render(<TextInput {...defaultProps} isLoading={true} />);
-    expect(screen.getByRole('button')).toBeDisabled();
+    const submitButton = screen.getByRole('button', { name: 'Extract Tasks' });
+    expect(submitButton).toBeDisabled();
   });
 
   it('disables submit when input is empty', () => {
     render(<TextInput {...defaultProps} />);
-    expect(screen.getByRole('button')).toBeDisabled();
+    const submitButton = screen.getByRole('button', { name: 'Extract Tasks' });
+    expect(submitButton).toBeDisabled();
   });
 
   it('enables submit with valid input', async () => {
@@ -51,14 +69,27 @@ describe('TextInput', () => {
       <TextInput {...defaultProps} value="This is a valid input text" onSubmit={onSubmit} />
     );
 
-    rerender(
-      <TextInput {...defaultProps} value="This is a valid input text" onSubmit={onSubmit} />
-    );
+    await act(async () => {
+      rerender(
+        <TextInput {...defaultProps} value="This is a valid input text" onSubmit={onSubmit} />
+      );
+    });
 
-    const submitButton = screen.getByRole('button');
+    const submitButton = screen.getByRole('button', { name: 'Extract Tasks' });
     expect(submitButton).not.toBeDisabled();
 
     await userEvent.click(submitButton);
     expect(onSubmit).toHaveBeenCalled();
+  });
+
+  it('clears draft when clear button is clicked', async () => {
+    const onChange = vi.fn();
+    render(<TextInput {...defaultProps} value="test" onChange={onChange} />);
+
+    const clearButton = screen.getByRole('button', { name: 'Clear' });
+    await userEvent.click(clearButton);
+
+    expect(onChange).toHaveBeenCalledWith('');
+    expect(localStorage.getItem('draft-text')).toBeNull();
   });
 });
